@@ -5,11 +5,17 @@
   {% if tasks %}
     <ul>
       {% for task in tasks %}
-        <li>{{ task.title }} - {{ task.description }}</li>
+        <li>
+          <strong>{{ task.title }}</strong> - {{ task.description }}
+          <br>
+          <a href="{% url 'edit_task' task.id %}">Edit</a> |
+          <a href="{% url 'delete_task' task.id %}">Delete</a>
+        </li>
       {% endfor %}
     </ul>
   {% else %}
     <p>No tasks found.</p>
   {% endif %}
+  <br>
   <a href="{% url 'add_task' %}">Add New Task</a>
 {% endblock %}
