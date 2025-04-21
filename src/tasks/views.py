@@ -10,7 +10,7 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Log in the user after registration
+            login(request, user)
             return redirect('task_list')
     else:
         form = RegisterForm()
@@ -37,10 +37,10 @@ def user_logout(request):
 # Ensure only logged-in users can access tasks
 @login_required
 def task_list(request):
-    tasks = Task.objects.filter(user=request.user)  # Show only the user's tasks
+    tasks = Task.objects.filter(user=request.user)
     return render(request, 'tasks/task_list.html', {'tasks': tasks})
 
-# Add a new task (requires authentication)
+# Add a new task (form-based view)
 @login_required
 def add_task(request):
     if request.method == 'POST':
@@ -50,7 +50,7 @@ def add_task(request):
         return redirect('task_list')
     return render(request, 'tasks/add_task.html')
 
-# Edit an existing task (requires authentication)
+# Edit an existing task
 @login_required
 def edit_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
@@ -61,7 +61,7 @@ def edit_task(request, task_id):
         return redirect('task_list')
     return render(request, 'tasks/edit_task.html', {'task': task})
 
-# Delete a task (requires authentication)
+# Delete a task
 @login_required
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "tasks",
+    "rest_framework",
     "corsheaders",  # Allow frontend to access Django API
 ]
 
