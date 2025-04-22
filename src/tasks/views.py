@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from .models import Task
+from .models import Category
 from .forms import RegisterForm
 
 # User registration view
@@ -46,20 +47,41 @@ def add_task(request):
     if request.method == 'POST':
         title = request.POST['title']
         description = request.POST.get('description', '')
-        Task.objects.create(user=request.user, title=title, description=description)
+        due_date = request.POST.get('due_date')
+        priority = request.POST.get('priority', 'Medium')
+        category_id = request.POST.get('category')
+        category = Category.objects.get(id=category_id) if category_id else None
+
+        Task.objects.create(
+            user=request.user,
+            title=title,
+            description=description,
+            due_date=due_date or None,
+            priority=priority,
+            category=category
+        )
         return redirect('task_list')
-    return render(request, 'tasks/add_task.html')
+
+    categories = Category.objects.all()
+    return render(request, 'tasks/add_task.html', {'categories': categories})
 
 # Edit an existing task
 @login_required
 def edit_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
+
     if request.method == 'POST':
         task.title = request.POST['title']
         task.description = request.POST['description']
+        task.due_date = request.POST.get('due_date') or None
+        task.priority = request.POST.get('priority', 'Medium')
+        category_id = request.POST.get('category')
+        task.category = Category.objects.get(id=category_id) if category_id else None
         task.save()
         return redirect('task_list')
-    return render(request, 'tasks/edit_task.html', {'task': task})
+
+    categories = Category.objects.all()
+    return render(request, 'tasks/edit_task.html', {'task': task, 'categories': categories})
 
 # Delete a task
 @login_required

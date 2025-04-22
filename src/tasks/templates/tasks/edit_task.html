@@ -1,17 +1,58 @@
 {% extends "tasks/base.html" %}
 
 {% block content %}
-  <h2>Edit Task</h2>
-  <form method="POST">
-    {% csrf_token %}
-    <label for="title">Title:</label><br>
-    <input type="text" name="title" id="title" value="{{ task.title }}" required><br><br>
+<div class="container mt-4">
+    <h2>Edit Task</h2>
+    <form method="POST" class="mt-4">
+        {% csrf_token %}
 
-    <label for="description">Description:</label><br>
-    <textarea name="description" id="description" rows="4" cols="50">{{ task.description }}</textarea><br><br>
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ task.title }}" required>
+        </div>
 
-    <button type="submit">Save Changes</button>
-  </form>
-  <br>
-  <a href="{% url 'task_list' %}">Back to Task List</a>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3">{{ task.description }}</textarea>
+        </div>
+
+        {% if task.due_date %}
+        <div class="mb-3">
+            <label for="due_date" class="form-label">Due Date</label>
+            <input type="date" class="form-control" id="due_date" name="due_date" value="{{ task.due_date|date:'Y-m-d' }}">
+        </div>
+        {% endif %}
+
+        {% if task.priority %}
+        <div class="mb-3">
+            <label for="priority" class="form-label">Priority</label>
+            <select class="form-select" id="priority" name="priority">
+                <option value="Low" {% if task.priority == 'Low' %}selected{% endif %}>Low</option>
+                <option value="Medium" {% if task.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                <option value="High" {% if task.priority == 'High' %}selected{% endif %}>High</option>
+            </select>
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" name="category">
+                <option value="">-- Select Category --</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if task.category and task.category.id == category.id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="completed" name="completed" {% if task.completed %}checked{% endif %}>
+            <label class="form-check-label" for="completed">Completed</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Task</button>
+        <a href="{% url 'task_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
 {% endblock %}
