@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Task, Category
 from .forms import RegisterForm
 from django.db.models import Q
+from django.views.decorators.http import require_POST
 
 # User registration view
 def register(request):
@@ -39,28 +40,34 @@ def user_logout(request):
 # Ensure only logged-in users can access tasks
 @login_required
 def task_list(request):
-    query = request.GET.get('q', '')
+    tasks = Task.objects.filter(user=request.user).order_by('-created_at')
+    categories = Category.objects.all()
+
+    # Get filters from query parameters
+    search_query = request.GET.get('search', '')
     category_id = request.GET.get('category', '')
 
-    tasks = Task.objects.filter(user=request.user)
+    # Filter by search term
+    if search_query:
+        tasks = tasks.filter(Q(title__icontains=search_query))
 
-    if query:
-        tasks = tasks.filter(title__icontains=query)
-
+    # Filter by category
     if category_id:
-        tasks = tasks.filter(category_id=category_id)
+        tasks = tasks.filter(category__id=category_id)
 
-    paginator = Paginator(tasks.order_by('-created_at'), 5)  # Show 5 tasks per page
+    # Pagination
+    paginator = Paginator(tasks, 5)  # 5 tasks per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    categories = Category.objects.all()
-
-    return render(request, 'tasks/task_list.html', {
+    context = {
         'tasks': page_obj,
         'categories': categories,
-    })
-
+        'search_query': search_query,
+        'selected_category': int(category_id) if category_id else '',
+        'page_obj': page_obj
+    }
+    return render(request, 'tasks/task_list.html', context)
 
 # Add a new task (form-based view)
 @login_required
@@ -110,6 +117,30 @@ def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
     task.delete()
     return redirect('task_list')
+
+@login_required
+@require_POST
+def toggle_complete(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    task.completed = not task.completed
+    task.save()
+    return redirect('task_list')
+
+@login_required
+def dashboard(request):
+    tasks = Task.objects.filter(user=request.user)
+    total = tasks.count()
+    completed = tasks.filter(completed=True).count()
+    incomplete = total - completed
+
+    category_breakdown = tasks.values('category__name').annotate(count=models.Count('id'))
+
+    return render(request, 'tasks/dashboard.html', {
+        'total': total,
+        'completed': completed,
+        'incomplete': incomplete,
+        'category_breakdown': category_breakdown,
+    })
 
 # Base view
 def base_view(request):
