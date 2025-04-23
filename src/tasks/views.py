@@ -1,9 +1,10 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
-from .models import Task
-from .models import Category
+from .models import Task, Category
 from .forms import RegisterForm
+from django.db.models import Q
 
 # User registration view
 def register(request):
@@ -38,8 +39,28 @@ def user_logout(request):
 # Ensure only logged-in users can access tasks
 @login_required
 def task_list(request):
+    query = request.GET.get('q', '')
+    category_id = request.GET.get('category', '')
+
     tasks = Task.objects.filter(user=request.user)
-    return render(request, 'tasks/task_list.html', {'tasks': tasks})
+
+    if query:
+        tasks = tasks.filter(title__icontains=query)
+
+    if category_id:
+        tasks = tasks.filter(category_id=category_id)
+
+    paginator = Paginator(tasks.order_by('-created_at'), 5)  # Show 5 tasks per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    categories = Category.objects.all()
+
+    return render(request, 'tasks/task_list.html', {
+        'tasks': page_obj,
+        'categories': categories,
+    })
+
 
 # Add a new task (form-based view)
 @login_required
