@@ -41,34 +41,47 @@ def user_logout(request):
 # Ensure only logged-in users can access tasks
 @login_required
 def task_list(request):
-    tasks = Task.objects.filter(user=request.user).order_by('-created_at')
-    categories = Category.objects.all()
+    tasks = Task.objects.filter(user=request.user)
 
-    # Get filters from query parameters
-    search_query = request.GET.get('search', '')
-    category_id = request.GET.get('category', '')
+    # Search functionality
+    query = request.GET.get('search', '')
+    if query:
+        tasks = tasks.filter(title__icontains=query)
 
-    # Filter by search term
-    if search_query:
-        tasks = tasks.filter(Q(title__icontains=search_query))
+    # Sort functionality
+    sort = request.GET.get('sort', '')
+    if sort == 'newest':
+        tasks = tasks.order_by('-created_at')
+    elif sort == 'oldest':
+        tasks = tasks.order_by('created_at')
+    elif sort == 'priority_high':
+        # Map priorities to numeric values for sorting
+        priority_order = {'High': 1, 'Medium': 2, 'Low': 3}
+        tasks = sorted(tasks, key=lambda t: priority_order.get(t.priority, 2))
+    elif sort == 'priority_low':
+        priority_order = {'High': 3, 'Medium': 2, 'Low': 1}
+        tasks = sorted(tasks, key=lambda t: priority_order.get(t.priority, 2))
+    elif sort == 'due_soon':
+        tasks = tasks.order_by('due_date')
+    elif sort == 'due_late':
+        tasks = tasks.order_by('-due_date')
 
-    # Filter by category
-    if category_id:
-        tasks = tasks.filter(category__id=category_id)
+    # If tasks is a sorted list instead of queryset, skip pagination with QuerySet
+    if isinstance(tasks, list):
+        paginator = Paginator(tasks, 5)
+    else:
+        paginator = Paginator(tasks, 5)
 
-    # Pagination
-    paginator = Paginator(tasks, 5)  # 5 tasks per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    context = {
-        'tasks': page_obj,
-        'categories': categories,
-        'search_query': search_query,
-        'selected_category': int(category_id) if category_id else '',
-        'page_obj': page_obj
-    }
-    return render(request, 'tasks/task_list.html', context)
+    return render(request, 'tasks/task_list.html', {
+        'page_obj': page_obj,
+        'sort': sort,
+        'search': query,
+    })
+
+
 
 # Add a new task (form-based view)
 @login_required

@@ -5,26 +5,31 @@
     <h2>Your Tasks</h2>
 
     <!-- Search and Filter -->
-    <form method="get" class="row g-3 mb-3">
-        <div class="col-md-6">
+    <form method="GET" class="row g-3 mb-4">
+        <div class="col-md-4">
             <input type="text" name="search" class="form-control" placeholder="Search tasks..." value="{{ request.GET.search }}">
         </div>
+
         <div class="col-md-4">
-            <select name="category" class="form-select">
-                <option value="">All Categories</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
-                {% endfor %}
+            <select name="sort" class="form-select bg-light border-primary" style="padding: 0.5rem;" onchange="this.form.submit()">        
+                <option value="">Sort By</option>
+                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                <option value="priority_high" {% if request.GET.sort == 'priority_high' %}selected{% endif %}>Priority: High → Low</option>
+                <option value="priority_low" {% if request.GET.sort == 'priority_low' %}selected{% endif %}>Priority: Low → High</option>
+                <option value="due_soon" {% if request.GET.sort == 'due_soon' %}selected{% endif %}>Due Date: Soonest</option>
+                <option value="due_late" {% if request.GET.sort == 'due_late' %}selected{% endif %}>Due Date: Latest</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-primary w-100">Apply</button>
+
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">Apply</button>
         </div>
     </form>
 
-    {% if tasks %}
+    {% if page_obj %}
         <ul class="list-group">
-            {% for task in tasks %}
+            {% for task in page_obj %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="mb-1 {% if task.completed %}text-muted text-decoration-line-through{% endif %}">{{ task.title }}</h5>
@@ -67,12 +72,12 @@
         <div class="mt-4">
             <nav>
                 <ul class="pagination justify-content-center">
-                    {% if tasks.has_previous %}
-                        <li class="page-item"><a class="page-link" href="?page={{ tasks.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Previous</a></li>
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">Previous</a></li>
                     {% endif %}
-                    <li class="page-item disabled"><a class="page-link">Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}</a></li>
-                    {% if tasks.has_next %}
-                        <li class="page-item"><a class="page-link" href="?page={{ tasks.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Next</a></li>
+                    <li class="page-item disabled"><a class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">Next</a></li>
                     {% endif %}
                 </ul>
             </nav>
