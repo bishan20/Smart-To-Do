@@ -1,3 +1,4 @@
+from datetime import date
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
@@ -128,19 +129,18 @@ def toggle_complete(request, task_id):
 
 @login_required
 def dashboard(request):
-    tasks = Task.objects.filter(user=request.user)
-    total = tasks.count()
-    completed = tasks.filter(completed=True).count()
-    incomplete = total - completed
+    today = date.today()
+    user_tasks = Task.objects.filter(user=request.user)
 
-    category_breakdown = tasks.values('category__name').annotate(count=models.Count('id'))
+    stats = {
+        'total': user_tasks.count(),
+        'completed': user_tasks.filter(completed=True).count(),
+        'due_today': user_tasks.filter(due_date=today).count(),
+        'overdue': user_tasks.filter(due_date__lt=today, completed=False).count()
+    }
 
-    return render(request, 'tasks/dashboard.html', {
-        'total': total,
-        'completed': completed,
-        'incomplete': incomplete,
-        'category_breakdown': category_breakdown,
-    })
+    return render(request, 'tasks/dashboard.html', {'stats': stats})
+
 
 # Base view
 def base_view(request):
