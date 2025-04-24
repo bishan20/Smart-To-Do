@@ -1,11 +1,13 @@
 from datetime import date
+from django.utils import timezone
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import Task, Category
 from .forms import RegisterForm
-from django.db.models import Q
+from django.db.models import Case, When, IntegerField
 from django.views.decorators.http import require_POST
 
 # User registration view
@@ -39,7 +41,6 @@ def user_logout(request):
     return redirect('login')
 
 # Ensure only logged-in users can access tasks
-@login_required
 def task_list(request):
     tasks = Task.objects.filter(user=request.user)
 
@@ -48,30 +49,39 @@ def task_list(request):
     if query:
         tasks = tasks.filter(title__icontains=query)
 
-    # Sort functionality
+    # Sort functionality using Django ORM only
     sort = request.GET.get('sort', '')
     if sort == 'newest':
         tasks = tasks.order_by('-created_at')
     elif sort == 'oldest':
         tasks = tasks.order_by('created_at')
     elif sort == 'priority_high':
-        # Map priorities to numeric values for sorting
-        priority_order = {'High': 1, 'Medium': 2, 'Low': 3}
-        tasks = sorted(tasks, key=lambda t: priority_order.get(t.priority, 2))
+        tasks = tasks.annotate(
+            priority_value=Case(
+                When(priority='High', then=1),
+                When(priority='Medium', then=2),
+                When(priority='Low', then=3),
+                default=4,
+                output_field=IntegerField()
+            )
+        ).order_by('priority_value')
     elif sort == 'priority_low':
-        priority_order = {'High': 3, 'Medium': 2, 'Low': 1}
-        tasks = sorted(tasks, key=lambda t: priority_order.get(t.priority, 2))
+        tasks = tasks.annotate(
+            priority_value=Case(
+                When(priority='High', then=3),
+                When(priority='Medium', then=2),
+                When(priority='Low', then=1),
+                default=2,
+                output_field=IntegerField()
+            )
+        ).order_by('priority_value')
     elif sort == 'due_soon':
         tasks = tasks.order_by('due_date')
     elif sort == 'due_late':
         tasks = tasks.order_by('-due_date')
 
-    # If tasks is a sorted list instead of queryset, skip pagination with QuerySet
-    if isinstance(tasks, list):
-        paginator = Paginator(tasks, 5)
-    else:
-        paginator = Paginator(tasks, 5)
-
+    # Pagination (always paginate the queryset)
+    paginator = Paginator(tasks, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -79,9 +89,8 @@ def task_list(request):
         'page_obj': page_obj,
         'sort': sort,
         'search': query,
+        'today': timezone.localdate(),
     })
-
-
 
 # Add a new task (form-based view)
 @login_required
@@ -102,6 +111,7 @@ def add_task(request):
             priority=priority,
             category=category
         )
+        messages.success(request, "Task created successfully.")
         return redirect('task_list')
 
     categories = Category.objects.all()
@@ -120,6 +130,7 @@ def edit_task(request, task_id):
         category_id = request.POST.get('category')
         task.category = Category.objects.get(id=category_id) if category_id else None
         task.save()
+        messages.success(request, "Task updated successfully.")
         return redirect('task_list')
 
     categories = Category.objects.all()
@@ -130,6 +141,7 @@ def edit_task(request, task_id):
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
     task.delete()
+    messages.success(request, "Task deleted successfully.")
     return redirect('task_list')
 
 @login_required

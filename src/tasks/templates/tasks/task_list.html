@@ -35,7 +35,15 @@
                         <h5 class="mb-1 {% if task.completed %}text-muted text-decoration-line-through{% endif %}">{{ task.title }}</h5>
                         <p class="mb-1 small">{{ task.description }}</p>
                         {% if task.category %}<span class="badge bg-secondary">{{ task.category.name }}</span>{% endif %}
-                        {% if task.due_date %}<span class="badge bg-warning text-dark">Due: {{ task.due_date }}</span>{% endif %}
+                        {% if task.due_date %}
+                            {% if task.due_date < today %}
+                                <span class="badge bg-danger">Overdue: {{ task.due_date }}</span>
+                            {% elif task.due_date == today %}
+                                <span class="badge bg-warning text-dark">Due Today: {{ task.due_date }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Due: {{ task.due_date }}</span>
+                            {% endif %}
+                        {% endif %}
                         <span class="badge {% if task.priority == 'High' %}bg-danger{% elif task.priority == 'Low' %}bg-success{% else %}bg-info{% endif %}">
                             {{ task.priority }}
                         </span>
