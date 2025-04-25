@@ -1,6 +1,14 @@
 {% extends "tasks/base.html" %}
 
 {% block content %}
+<div class="container mt-3">
+    <!-- Filter Buttons with Active State -->
+    <div class="btn-group" role="group">
+        <a href="?filter=today" class="btn btn-primary {% if filter == 'today' %}active{% endif %}">📅 Today’s Tasks</a>
+        <a href="?filter=upcoming" class="btn btn-secondary {% if filter == 'upcoming' %}active{% endif %}">⏳ Upcoming Tasks</a>
+    </div>
+</div>
+
 <div class="container mt-4">
     <h2>Your Tasks</h2>
 
