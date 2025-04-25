@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
@@ -41,6 +41,7 @@ def user_logout(request):
     return redirect('login')
 
 # Ensure only logged-in users can access tasks
+@login_required
 def task_list(request):
     tasks = Task.objects.filter(user=request.user)
 
@@ -80,6 +81,16 @@ def task_list(request):
     elif sort == 'due_late':
         tasks = tasks.order_by('-due_date')
 
+    # Filter functionality (Today’s Tasks and Upcoming Tasks)
+    filter_type = request.GET.get('filter')
+    today = timezone.localdate()
+    upcoming = today + timedelta(days=7)
+
+    if filter_type == 'today':
+        tasks = tasks.filter(due_date=today)
+    elif filter_type == 'upcoming':
+        tasks = tasks.filter(due_date__range=[today, upcoming])
+
     # Pagination (always paginate the queryset)
     paginator = Paginator(tasks, 5)
     page_number = request.GET.get('page')
@@ -89,7 +100,8 @@ def task_list(request):
         'page_obj': page_obj,
         'sort': sort,
         'search': query,
-        'today': timezone.localdate(),
+        'today': today,
+        'filter': filter_type,  # Pass the current filter for active state in the template
     })
 
 # Add a new task (form-based view)

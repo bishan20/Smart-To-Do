@@ -12,7 +12,7 @@ class Task(models.Model):
     title = models.CharField(max_length=255)  # Task name (e.g., "assignment")
     description = models.TextField(blank=True, null=True)  # Optional task description
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)  # Optional category for task
-    due_date = models.DateField(null=True, blank=True)  # Optional deadline for the task
+    due_date = models.DateField()  # Deadline for the task
     priority = models.CharField(
         max_length=10,
         choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')],
