@@ -6,7 +6,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Task, Category
-from .forms import RegisterForm
+from .forms import RegisterForm, UpdateProfileForm
 from django.db.models import Case, When, IntegerField
 from django.views.decorators.http import require_POST
 
@@ -178,6 +178,26 @@ def dashboard(request):
 
     return render(request, 'tasks/dashboard.html', {'stats': stats})
 
+@login_required
+def settings_view(request):
+    return render(request, 'users/settings.html')
+
+@login_required
+def profile_view(request):
+    return render(request, 'users/profile.html')
+
+@login_required
+def update_profile(request):
+    if request.method == 'POST':
+        form = UpdateProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('profile')
+    else:
+        form = UpdateProfileForm(instance=request.user)
+
+    return render(request, 'users/update_profile.html', {'form': form})
 
 # Base view
 def base_view(request):
