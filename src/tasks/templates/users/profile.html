@@ -1,15 +1,16 @@
 {% extends "tasks/base.html" %}
 
-{% block title %}Your Profile{% endblock %}
+{% block title %}Profile{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="mb-4">Your Profile</h2>
-
+<div class="container mt-5">
+    <h2 class="mb-4">Profile Details</h2>
     <div class="card">
         <div class="card-body">
+            <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
             <p><strong>Username:</strong> {{ user.username }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
+
         </div>
     </div>
 </div>
