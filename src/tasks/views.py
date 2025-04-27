@@ -189,15 +189,22 @@ def profile_view(request):
 @login_required
 def update_profile(request):
     if request.method == 'POST':
-        form = UpdateProfileForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully.')
-            return redirect('profile')
-    else:
-        form = UpdateProfileForm(instance=request.user)
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
 
-    return render(request, 'users/update_profile.html', {'form': form})
+        user = request.user
+        user.first_name = first_name.capitalize()
+        user.last_name = last_name.capitalize()
+        user.username = username
+        user.email = email
+        user.save()
+
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('profile')
+
+    return render(request, 'users/update_profile.html')
 
 # Base view
 def base_view(request):

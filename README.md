@@ -1,88 +1,154 @@
-# Smart To-Do List Web Application
 
-## Project Name
-Smart To-Do 
+# 📋 Smart To-Do List Web App
 
-## Description
-The Smart To-Do List web application helps users efficiently manage their tasks by providing an intuitive interface for adding, editing, and deleting tasks. It integrates user authentication, enabling personalized task management for each user. The app allows users to categorize their tasks, set priorities, and view their tasks in a list format.
+---
 
-## Purpose
-The main purpose of the Smart To-Do List is to help individuals organize their tasks and stay on top of their daily responsibilities. The application provides a clean, user-friendly interface for managing tasks, making it easy for users to add, modify, and delete tasks, as well as track their progress.
+## 📖 Description, Purpose, and Value
 
-## Value
-This app brings value by simplifying task management and helping users prioritize their work. It allows users to:
-- Create personalized task lists
-- Edit and delete tasks as needed
-- Stay organized by categorizing tasks
-- Use authentication for secure, personalized task management
+The **Smart To-Do List** is a Django-powered web application that helps users efficiently manage their daily tasks.  
+Key features include:
 
-## Technologies Used
-- **Django**: Web framework for backend development.
-- **HTML**: For structuring web pages.
-- **CSS**: For styling and creating responsive layouts.
-- **JavaScript**: For any dynamic functionality.
-- **SQLite** (or other databases): For storing user data and tasks.
-- **Bootstrap** (optional): For a responsive and clean user interface.
+- User registration, login, and logout system.
+- Add, edit, delete, and view tasks.
+- Sort tasks by due date, priority, or creation time.
+- View today's tasks and upcoming tasks easily.
+- Email reminders for tasks due soon.
+- Light and dark mode toggle for better user experience.
+- Profile settings to update name, username and email securely.
+- Clean, responsive UI using Bootstrap.
 
-## Features
-- User registration and login
-- Task management (create, edit, delete tasks)
-- Task categorization (optional)
-- User-specific task list (authenticated users)
-- Secure login/logout functionality
+> **Purpose:**  
+To provide a personal task management solution that is simple, intuitive, and accessible.
 
-## Installation
+> **Value:**  
+Boosts productivity by organizing tasks, offering reminders, and ensuring users never miss important deadlines.
 
-1. **Clone the repository**:
+---
 
-    ```bash
-    git clone https://github.com/bishan20/Smart-To-Do.git
-    cd Smart-To-Do
-    ```
+## 💻 Technologies Used
 
-2. **Install dependencies**:
+- **Python 3.12**
+- **Django 5.1.6**
+- **SQLite3** (default Django database)
+- **Bootstrap 5** (for frontend design)
+- **HTML/CSS/JavaScript**
+- **Gmail SMTP** (for sending task reminder emails)
 
-    Ensure you have `Django` installed. If not, you can install it using:
+---
 
-    ```bash
-    pip install django
-    ```
+## 🛠️ Setup Instructions
 
-3. **Run the server**:
+Follow these steps to clone and run the project locally:
 
-    ```bash
-    python manage.py runserver
-    ```
+1. **Install Python**
 
-4. **Access the app**:
+   Make sure Python 3.x is installed on your machine.  
+   [Download Python](https://www.python.org/downloads/)
 
-    Open a web browser and go to `http://127.0.0.1:8000` to use the app.
+2. **Clone the Repository**
 
-## How to Use
+   ```bash
+   git clone <your-repository-link>
+   cd Smart-To-Do/src
+   ```
 
-1. **User Registration**: 
-    - Navigate to the registration page to create an account.
-    - Provide a username, email, and password to sign up.
+3. **Create a Virtual Environment (Recommended)**
 
-2. **Login**: 
-    - After registration, you can log in with your username and password.
+   ```bash
+   python -m venv venv
+   source venv/bin/activate    # On Mac/Linux
+   venv\Scripts\activate     # On Windows
+   ```
 
-3. **Task Management**: 
-    - After logging in, you will be redirected to your task list page.
-    - You can add, edit, and delete tasks from the list.
-    - Tasks are displayed in a simple list format, with options to modify or remove them.
+4. **Install Dependencies**
 
-## Future Enhancements
-- Add task prioritization (e.g., high, medium, low).
-- Allow users to set due dates and reminders for tasks.
-- Implement additional features like notifications and recurring tasks.
-- Support for task categories or labels.
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+5. **Set Up the Database**
 
-## Acknowledgements
-- Django for providing the powerful framework.
-- Bootstrap for the clean and responsive UI.
-- Thanks to all the contributors who helped make this project possible.
+   Run migrations to create necessary tables:
 
+   ```bash
+   python manage.py migrate
+   ```
+
+6. **Create a Superuser (Optional)**
+
+   If you want to access Django Admin:
+
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+7. **Run the Development Server**
+
+   ```bash
+   python manage.py runserver
+   ```
+
+8. **Open the App**
+
+   Open your browser and visit:
+
+   ```
+   http://127.0.0.1:8000/
+   ```
+
+9. **Set Up Email for Task Reminders (Optional)**
+
+   To enable email task reminders:
+
+   - In `settings.py`, configure your Gmail SMTP settings:
+
+     ```python
+     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+     EMAIL_HOST = 'smtp.gmail.com'
+     EMAIL_PORT = 587
+     EMAIL_USE_TLS = True
+     EMAIL_HOST_USER = 'your-email@gmail.com'
+     EMAIL_HOST_PASSWORD = 'your-app-password'
+     DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
+     ```
+
+   > 💡 Tip: If you have 2FA enabled, generate an [App Password](https://support.google.com/accounts/answer/185833) from Google.
+
+10. **Testing Email Reminders**
+
+    - After running the server, create a new task **due tomorrow**.
+    - Then run the custom management command manually:
+
+      ```bash
+      python manage.py send_task_reminders
+      ```
+
+    - If everything is set up correctly, an email reminder will be sent to your registered email address.
+
+---
+
+## 🎬 YouTube Video Link
+
+👉 [Watch the demo video here](your-link-here)
+
+---
+
+## ✅ Project Runs Successfully
+
+- Clone the repository ✅
+- Follow README instructions ✅
+- No issues launching or using the app ✅
+- Tested user registration, login, task creation, filtering, and email reminders ✅
+- Light and Dark mode working ✅
+
+---
+
+# 🚀 Notes
+
+- The project is built using **Django's built-in authentication system**.
+- User data is safely stored and email notifications are handled securely.
+- The UI is responsive for desktop and mobile browsers.
+- All templates are organized inside `tasks/templates/tasks/` and `tasks/templates/users/` folders.
+- Static files (CSS/JS) are located inside `tasks/static/`.
+
+---
