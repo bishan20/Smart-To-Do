@@ -93,7 +93,7 @@ Follow these steps to clone and run the project locally:
    Open your browser and visit:
 
    ```
-   http://127.0.0.1:8000/
+   http://127.0.0.1:8000/register
    ```
 
 9. **Set Up Email for Task Reminders (Optional)**
