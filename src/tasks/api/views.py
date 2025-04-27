@@ -6,6 +6,7 @@ from tasks.models import Task
 from .serializers import TaskSerializer
 from django.shortcuts import get_object_or_404
 
+# Creating a new task
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_task_api(request):
@@ -15,6 +16,7 @@ def create_task_api(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# Updating an existing task
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def edit_task_api(request, task_id):
@@ -25,6 +27,7 @@ def edit_task_api(request, task_id):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# Deleting an existing task
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_task_api(request, task_id):

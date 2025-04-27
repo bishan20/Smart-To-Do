@@ -164,6 +164,7 @@ def toggle_complete(request, task_id):
     task.save()
     return redirect('task_list')
 
+# Dashboard for the tasks
 @login_required
 def dashboard(request):
     today = date.today()
@@ -178,6 +179,7 @@ def dashboard(request):
 
     return render(request, 'tasks/dashboard.html', {'stats': stats})
 
+# User profile settings
 @login_required
 def settings_view(request):
     return render(request, 'users/settings.html')
