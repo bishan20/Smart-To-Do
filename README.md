@@ -48,7 +48,7 @@ Follow these steps to clone and run the project locally:
 2. **Clone the Repository**
 
    ```bash
-   git clone <your-repository-link>
+   git clone https://github.com/bishan20/Smart-To-Do.git
    cd Smart-To-Do/src
    ```
 
